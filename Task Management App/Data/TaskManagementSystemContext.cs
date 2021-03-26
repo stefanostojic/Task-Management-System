@@ -12,6 +12,12 @@ namespace Task_Management_System.Data
         {
         }
 
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    optionsBuilder
+        //        .UseSqlServer(@"Data Source=DESKTOP-TLQCK5S\SQLTEST;Initial Catalog=TaskManagementSystemDB;Trusted_Connection=True");
+        //}
+
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Image> Images { get; set; }
         public DbSet<Invoice> Invoices { get; set; }
