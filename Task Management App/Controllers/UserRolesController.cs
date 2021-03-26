@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -21,22 +22,20 @@ namespace Task_Management_System.Controllers
             _context = context;
         }
 
-        // GET: UserRoles
         public async Task<IActionResult> Index()
         {
             return View(await _context.UserRoles.ToListAsync());
         }
 
-        // GET: UserRoles
-        [HttpGet("getUserRoles")]
+        [HttpGet]
         public async Task<IActionResult> GetUserRoles()
         {
             var userRoles = await _context.UserRoles.ToListAsync();
             return Ok(userRoles);
         }
 
-        // GET: UserRoles/Details/5
-        public async Task<IActionResult> Details(Guid? id)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUserRoleById(Guid? id)
         {
             if (id == null)
             {
@@ -50,9 +49,10 @@ namespace Task_Management_System.Controllers
                 return NotFound();
             }
 
-            return View(userRole);
+            //return View(userRole);
+            return Ok(userRole);
         }
-
+        
         // GET: UserRoles/Create
         public IActionResult Create()
         {
@@ -62,18 +62,33 @@ namespace Task_Management_System.Controllers
         // POST: UserRoles/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Create([Bind("ID,Name")] UserRole userRole)
+        //{
+        //    if (ModelState.IsValid)
+        //    {
+        //        userRole.ID = Guid.NewGuid();
+        //        _context.Add(userRole);
+        //        await _context.SaveChangesAsync();
+        //        return RedirectToAction(nameof(Index));
+        //    }
+        //    return View(userRole);
+        //}
+
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Name")] UserRole userRole)
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddNewUserRole([FromBody] UserRole userRole)
         {
             if (ModelState.IsValid)
             {
                 userRole.ID = Guid.NewGuid();
                 _context.Add(userRole);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return CreatedAtAction(nameof(AddNewUserRole), new { id = userRole.ID }, userRole);
+                //return Ok(userRole);
             }
-            return View(userRole);
+            return BadRequest();
         }
 
         // GET: UserRoles/Edit/5
@@ -95,13 +110,13 @@ namespace Task_Management_System.Controllers
         // POST: UserRoles/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("ID,Name")] UserRole userRole)
+        [HttpPut("{id}")]
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Guid id, UserRole userRole)
         {
             if (id != userRole.ID)
             {
-                return NotFound();
+                return BadRequest();
             }
 
             if (ModelState.IsValid)
@@ -122,43 +137,62 @@ namespace Task_Management_System.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                return Ok(userRole);
             }
-            return View(userRole);
+            return NoContent();
         }
 
         // GET: UserRoles/Delete/5
-        public async Task<IActionResult> Delete(Guid? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+        //public async Task<IActionResult> Delete(Guid? id)
+        //{
+        //    if (id == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            var userRole = await _context.UserRoles
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (userRole == null)
-            {
-                return NotFound();
-            }
+        //    var userRole = await _context.UserRoles
+        //        .FirstOrDefaultAsync(m => m.ID == id);
+        //    if (userRole == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return View(userRole);
-        }
+        //    return View(userRole);
+        //}
 
         // POST: UserRoles/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUserRole(Guid id)
         {
-            var userRole = await _context.UserRoles.FindAsync(id);
-            _context.UserRoles.Remove(userRole);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                var userRole = await _context.UserRoles.FindAsync(id);
+                if (userRole == null)
+                {
+                    return NotFound();
+                }
+
+                _context.UserRoles.Remove(userRole);
+                await _context.SaveChangesAsync();
+
+                return NoContent();
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Delete error");
+            }
         }
 
         private bool UserRoleExists(Guid id)
         {
             return _context.UserRoles.Any(e => e.ID == id);
+        }
+
+        [HttpOptions]
+        public IActionResult GetUserRolesOptions()
+        {
+            Response.Headers.Add("Allow", "GET, POST, PUT, DELETE");
+            return Ok();
         }
     }
 }
