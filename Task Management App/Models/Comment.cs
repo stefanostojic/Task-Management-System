@@ -10,5 +10,7 @@ namespace Task_Management_System.Models
         public Guid ID { get; set; }
         public string Text { get; set; }
         public DateTime DateTime { get; set; }
+        public Guid UserID { get; set; }
+        public Guid TaskID { get; set; }
     }
 }

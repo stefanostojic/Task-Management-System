@@ -13,6 +13,7 @@ namespace Task_Management_System.Models
         public string Email { get; set; }
         public string Password { get; set; }
         public Guid UserRoleID { get; set; }
+        public Guid ImageID { get; set; }
 
         public List<Project> Projects { get; set; }
     }
