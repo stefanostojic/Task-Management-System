@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Linq;
 using Task_Management_System.Models;
 
@@ -13,8 +14,12 @@ namespace Task_Management_System.Data
             // Look for any students.
             if (context.Users.Any())
             {
-                return;   // DB has been seeded
+                //return;   // DB has been seeded
             }
+
+            context.Database.EnsureDeleted();
+            context.Database.Migrate();
+
 
             var userRoles = new UserRole[]
             {
@@ -42,10 +47,11 @@ namespace Task_Management_System.Data
                 new User {
                     ID = Guid.Parse("c68af42e-fd7c-4ebb-a8d1-f714a47f60a7"),
                     FirstName = "Stefan",
-                    LastName = "Ostojic",
+                    LastName = "Ostojić",
                     Email = "s.ostojic@email.com",
                     Password = "123",
-                    UserRoleID = Guid.Parse("56860de3-f338-449c-be26-c946d4cb73b0")
+                    UserRoleID = Guid.Parse("56860de3-f338-449c-be26-c946d4cb73b0"),
+                    ImageID = null
                 }, // NormalUser
                 new User {
                     ID = Guid.Parse("fe556bd9-f1bb-4f6a-b2b1-245f8daf9c08"),
@@ -53,15 +59,17 @@ namespace Task_Management_System.Data
                     LastName = "Krstić",
                     Email = "d.krstic@email.com",
                     Password = "123",
-                    UserRoleID = Guid.Parse("56860de3-f338-449c-be26-c946d4cb73b0")
+                    UserRoleID = Guid.Parse("56860de3-f338-449c-be26-c946d4cb73b0"),
+                    ImageID = null
                 }, // NormalUser
                 new User {
                     ID = Guid.Parse("008127f1-efcd-4a74-8b26-cef9d4854c0c"),
                     FirstName = "Dejan",
                     LastName = "Tosenberger",
-                    Email = "tosenberger@email.com",
+                    Email = "d.tosenberger@email.com",
                     Password = "123",
-                    UserRoleID = Guid.Parse("c8ae737c-ed9b-4fee-be6f-9c74ba376ae7")
+                    UserRoleID = Guid.Parse("c8ae737c-ed9b-4fee-be6f-9c74ba376ae7"),
+                    ImageID = null
                 } // Administrator
             };
             foreach (User u in users)
@@ -138,7 +146,7 @@ namespace Task_Management_System.Data
                     Description = "Potrebno je dizajnirati novi sajt Erste banke.",
                     Finished = false,
                     DueDate = DateTime.Parse("2021-04-15T09:00:00"),
-                    TaskGroupID = Guid.Parse("cfaba562-3760-4065-8a64-2020e03442de")
+                    //TaskGroupID = Guid.Parse("cfaba562-3760-4065-8a64-2020e03442de")
                 }, // Stefan, Erste banka, Sajt
                 new Task {
                     ID = Guid.Parse("ff237276-30b2-42ef-ae5d-155e3255486f"),
@@ -146,7 +154,7 @@ namespace Task_Management_System.Data
                     Description = "Potrebno je isprojektovati bazu podataka za novi sajt Erste banke.",
                     Finished = false,
                     DueDate = DateTime.Parse("2021-04-25T10:00:00"),
-                    TaskGroupID = Guid.Parse("cfaba562-3760-4065-8a64-2020e03442de")
+                    //TaskGroupID = Guid.Parse("cfaba562-3760-4065-8a64-2020e03442de")
                 } // Stefan, Erste banka, Sajt
             };
             foreach (Task t in tasks)
@@ -163,7 +171,8 @@ namespace Task_Management_System.Data
                     EstimatedEndDate = DateTime.Parse("2021-04-01T10:00:00"),
                     ActualEndDate = DateTime.Parse("2021-03-29T11:00:00"),
                     UserID = Guid.Parse("fe556bd9-f1bb-4f6a-b2b1-245f8daf9c08"),
-                    TaskID = Guid.Parse("304ea812-5153-4992-a8bc-da8c22ab1fad")
+                    TaskID = Guid.Parse("304ea812-5153-4992-a8bc-da8c22ab1fad"),
+                    TaskRole = null
                 }, // Stefan, Erste banka, Sajt, Dizajn
                 new UserTask {
                     ID = Guid.Parse("59b44150-133f-4d77-b0f7-e55855943910"),
@@ -171,7 +180,8 @@ namespace Task_Management_System.Data
                     EstimatedEndDate = DateTime.Parse("2021-04-01T10:00:00"),
                     ActualEndDate = DateTime.Parse("2021-03-29T11:00:00"),
                     UserID = Guid.Parse("c68af42e-fd7c-4ebb-a8d1-f714a47f60a7"),
-                    TaskID = Guid.Parse("304ea812-5153-4992-a8bc-da8c22ab1fad")
+                    TaskID = Guid.Parse("304ea812-5153-4992-a8bc-da8c22ab1fad"),
+                    TaskRole = null
                 } // Stefan, Erste banka, Sajt, Dizajn
             };
             foreach (UserTask ut in userTasks)
