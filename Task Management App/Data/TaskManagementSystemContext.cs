@@ -32,5 +32,32 @@ namespace Task_Management_System.Data
         public DbSet<User> Users { get; set; }
         public DbSet<UserTask> UserTasks { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<User>()
+                .HasOne(e => e.UserImage)
+                .WithOne(e => e.User)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<UserTask>()
+                .HasKey(ut => new { ut.UserID, ut.TaskID});
+            modelBuilder.Entity<UserTask>()
+                .HasOne(u => u.User)
+                .WithMany(ut => ut.UserTasks);
+            modelBuilder.Entity<UserTask>()
+                .HasOne(t => t.Task)
+                .WithMany(ut => ut.UserTasks);
+
+            modelBuilder.Entity<UserTask>()
+                .HasOne(tr => tr.TaskRole)
+                .WithMany(ut => ut.UserTasks)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            //modelBuilder.Entity<TaskRole>()
+            //    .HasMany(ut => ut.UserTasks)
+            //    .WithOne(tr => tr.TaskRole)
+            //    .OnDelete(DeleteBehavior.SetNull);
+        }
     }
 }
