@@ -12,6 +12,6 @@ namespace Task_Management_System.Models
         public string Description { get; set; }
         public Guid ProjectID { get; set; } 
 
-        public List<Task> Tasks { get; set; }
+        //public List<Task> Tasks { get; set; }
     }
 }

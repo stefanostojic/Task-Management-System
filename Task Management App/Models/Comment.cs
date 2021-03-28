@@ -12,5 +12,8 @@ namespace Task_Management_System.Models
         public DateTime DateTime { get; set; }
         public Guid UserID { get; set; }
         public Guid TaskID { get; set; }
+
+        public User User { get; set; }
+        public Task Task { get; set; }
     }
 }
