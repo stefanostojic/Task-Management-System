@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Task_Management_System.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class InitialMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -47,6 +47,21 @@ namespace Task_Management_System.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Tasks",
+                columns: table => new
+                {
+                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Finished = table.Column<bool>(type: "bit", nullable: false),
+                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tasks", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserRoles",
                 columns: table => new
                 {
@@ -59,16 +74,57 @@ namespace Task_Management_System.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Comments",
+                columns: table => new
+                {
+                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Text = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TaskID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Comments", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Comments_Tasks_TaskID",
+                        column: x => x.TaskID,
+                        principalTable: "Tasks",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Subtasks",
+                columns: table => new
+                {
+                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Finished = table.Column<bool>(type: "bit", nullable: false),
+                    TaskID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Subtasks", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Subtasks_Tasks_TaskID",
+                        column: x => x.TaskID,
+                        principalTable: "Tasks",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
                     ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Password = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UserRoleID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ImageID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ImageID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Active = table.Column<bool>(type: "bit", nullable: true),
@@ -77,23 +133,39 @@ namespace Task_Management_System.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Users_UserRoles_UserRoleID",
+                        column: x => x.UserRoleID,
+                        principalTable: "UserRoles",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserTasks",
+                name: "Images",
                 columns: table => new
                 {
                     ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AssignmentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EstimatedEndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ActualEndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UserID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TaskID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TaskRoleID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TaskID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserTasks", x => x.ID);
+                    table.PrimaryKey("PK_Images", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Images_Tasks_TaskID",
+                        column: x => x.TaskID,
+                        principalTable: "Tasks",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Images_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -141,6 +213,41 @@ namespace Task_Management_System.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserTasks",
+                columns: table => new
+                {
+                    UserID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TaskID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AssignmentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EstimatedEndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ActualEndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TaskRoleID = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserTasks", x => new { x.UserID, x.TaskID });
+                    table.ForeignKey(
+                        name: "FK_UserTasks_TaskRoles_TaskRoleID",
+                        column: x => x.TaskRoleID,
+                        principalTable: "TaskRoles",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_UserTasks_Tasks_TaskID",
+                        column: x => x.TaskID,
+                        principalTable: "Tasks",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserTasks_Users_UserID",
+                        column: x => x.UserID,
+                        principalTable: "Users",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TaskGroups",
                 columns: table => new
                 {
@@ -160,88 +267,6 @@ namespace Task_Management_System.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Tasks",
-                columns: table => new
-                {
-                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Finished = table.Column<bool>(type: "bit", nullable: false),
-                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TaskGroupID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Tasks", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_Tasks_TaskGroups_TaskGroupID",
-                        column: x => x.TaskGroupID,
-                        principalTable: "TaskGroups",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Comments",
-                columns: table => new
-                {
-                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Text = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DateTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UserID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TaskID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Comments", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_Comments_Tasks_TaskID",
-                        column: x => x.TaskID,
-                        principalTable: "Tasks",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Images",
-                columns: table => new
-                {
-                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    TaskID = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Images", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_Images_Tasks_TaskID",
-                        column: x => x.TaskID,
-                        principalTable: "Tasks",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Subtasks",
-                columns: table => new
-                {
-                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Finished = table.Column<bool>(type: "bit", nullable: false),
-                    TaskID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Subtasks", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_Subtasks_Tasks_TaskID",
-                        column: x => x.TaskID,
-                        principalTable: "Tasks",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_Comments_TaskID",
                 table: "Comments",
@@ -251,6 +276,13 @@ namespace Task_Management_System.Migrations
                 name: "IX_Images_TaskID",
                 table: "Images",
                 column: "TaskID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Images_UserId",
+                table: "Images",
+                column: "UserId",
+                unique: true,
+                filter: "[UserId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Invoices_ProUserID",
@@ -273,9 +305,19 @@ namespace Task_Management_System.Migrations
                 column: "ProjectID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tasks_TaskGroupID",
-                table: "Tasks",
-                column: "TaskGroupID");
+                name: "IX_Users_UserRoleID",
+                table: "Users",
+                column: "UserRoleID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserTasks_TaskID",
+                table: "UserTasks",
+                column: "TaskID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserTasks_TaskRoleID",
+                table: "UserTasks",
+                column: "TaskRoleID");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -299,25 +341,25 @@ namespace Task_Management_System.Migrations
                 name: "Subtasks");
 
             migrationBuilder.DropTable(
-                name: "TaskRoles");
-
-            migrationBuilder.DropTable(
-                name: "UserRoles");
+                name: "TaskGroups");
 
             migrationBuilder.DropTable(
                 name: "UserTasks");
 
             migrationBuilder.DropTable(
-                name: "Tasks");
-
-            migrationBuilder.DropTable(
-                name: "TaskGroups");
-
-            migrationBuilder.DropTable(
                 name: "Projects");
 
             migrationBuilder.DropTable(
+                name: "TaskRoles");
+
+            migrationBuilder.DropTable(
+                name: "Tasks");
+
+            migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "UserRoles");
         }
     }
 }
