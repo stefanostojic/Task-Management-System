@@ -1,0 +1,45 @@
+﻿IF OBJECT_ID('UserTasks', 'U') IS NOT NULL
+    TRUNCATE TABLE UserTasks;
+GO
+IF OBJECT_ID('TaskRoles', 'U') IS NOT NULL
+    TRUNCATE TABLE TaskRoles;
+GO
+IF OBJECT_ID('Subtasks', 'U') IS NOT NULL
+    TRUNCATE TABLE Subtasks;
+GO
+IF OBJECT_ID('Labels', 'U') IS NOT NULL
+    TRUNCATE TABLE Labels;
+GO
+IF OBJECT_ID('Comments', 'U') IS NOT NULL
+    TRUNCATE TABLE Comments;
+GO
+IF OBJECT_ID('Invoices', 'U') IS NOT NULL
+    TRUNCATE TABLE Invoices;
+GO
+IF OBJECT_ID('ProPlans', 'U') IS NOT NULL
+    TRUNCATE TABLE ProPlans;
+GO
+--IF OBJECT_ID('Tasks', 'U') IS NOT NULL
+--    TRUNCATE TABLE Tasks;
+--GO
+IF OBJECT_ID('Images', 'U') IS NOT NULL
+    TRUNCATE TABLE Images;
+GO
+IF OBJECT_ID('TaskGroups', 'U') IS NOT NULL
+    TRUNCATE TABLE TaskGroups;
+GO
+IF OBJECT_ID('Users', 'U') IS NOT NULL
+    TRUNCATE TABLE Users;
+GO
+IF OBJECT_ID('Projects', 'U') IS NOT NULL
+    TRUNCATE TABLE Projects;
+GO
+
+
+--IF OBJECT_ID('UserRoles', 'U') IS NOT NULL
+--    TRUNCATE TABLE UserRoles;
+--GO
+
+
+
+
