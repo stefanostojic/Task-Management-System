@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Task_Management_System.Data;
 
-namespace Task_Management_App
+namespace Task_Management_System
 {
     public class Startup
     {
