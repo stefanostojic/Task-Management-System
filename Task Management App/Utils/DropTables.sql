@@ -1,4 +1,7 @@
-﻿IF OBJECT_ID('UserTasks', 'U') IS NOT NULL
+﻿IF OBJECT_ID('__EFMigrationsHistory', 'U') IS NOT NULL
+    DROP TABLE __EFMigrationsHistory;
+GO
+IF OBJECT_ID('UserTasks', 'U') IS NOT NULL
     DROP TABLE UserTasks;
 GO
 IF OBJECT_ID('TaskRoles', 'U') IS NOT NULL
@@ -37,5 +40,12 @@ GO
 IF OBJECT_ID('UserRoles', 'U') IS NOT NULL
     DROP TABLE UserRoles;
 GO
-
-
+IF OBJECT_ID('Blocks', 'U') IS NOT NULL
+    DROP TABLE Blocks;
+GO
+IF OBJECT_ID('Comments', 'U') IS NOT NULL
+    DROP TABLE Comments;
+GO
+IF OBJECT_ID('UserProjects', 'U') IS NOT NULL
+    DROP TABLE UserProjects;
+GO

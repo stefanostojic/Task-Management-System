@@ -19,6 +19,24 @@ namespace Task_Management_System.Migrations
                 .HasAnnotation("ProductVersion", "5.0.4")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+            modelBuilder.Entity("Task_Management_System.Models.Block", b =>
+                {
+                    b.Property<Guid>("User1ID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("User2ID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("User1ID", "User2ID");
+
+                    b.HasIndex("User2ID");
+
+                    b.ToTable("Blocks");
+                });
+
             modelBuilder.Entity("Task_Management_System.Models.Comment", b =>
                 {
                     b.Property<Guid>("ID")
@@ -41,7 +59,27 @@ namespace Task_Management_System.Migrations
 
                     b.HasIndex("TaskID");
 
+                    b.HasIndex("UserID");
+
                     b.ToTable("Comments");
+                });
+
+            modelBuilder.Entity("Task_Management_System.Models.Contact", b =>
+                {
+                    b.Property<Guid>("User1ID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("User2ID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("Accepted")
+                        .HasColumnType("bit");
+
+                    b.HasKey("User1ID", "User2ID");
+
+                    b.HasIndex("User2ID");
+
+                    b.ToTable("Contacts");
                 });
 
             modelBuilder.Entity("Task_Management_System.Models.Image", b =>
@@ -284,6 +322,21 @@ namespace Task_Management_System.Migrations
                     b.HasDiscriminator<string>("Discriminator").HasValue("User");
                 });
 
+            modelBuilder.Entity("Task_Management_System.Models.UserProject", b =>
+                {
+                    b.Property<Guid>("UserID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProjectID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("UserID", "ProjectID");
+
+                    b.HasIndex("ProjectID");
+
+                    b.ToTable("UserProjects");
+                });
+
             modelBuilder.Entity("Task_Management_System.Models.UserRole", b =>
                 {
                     b.Property<Guid>("ID")
@@ -360,13 +413,61 @@ namespace Task_Management_System.Migrations
                     b.HasDiscriminator().HasValue("ProUser");
                 });
 
+            modelBuilder.Entity("Task_Management_System.Models.Block", b =>
+                {
+                    b.HasOne("Task_Management_System.Models.User", "User1")
+                        .WithMany("BlocksByUser")
+                        .HasForeignKey("User1ID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Task_Management_System.Models.User", "User2")
+                        .WithMany("BlocksByOthers")
+                        .HasForeignKey("User2ID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("User1");
+
+                    b.Navigation("User2");
+                });
+
             modelBuilder.Entity("Task_Management_System.Models.Comment", b =>
                 {
-                    b.HasOne("Task_Management_System.Models.Task", null)
+                    b.HasOne("Task_Management_System.Models.Task", "Task")
                         .WithMany("Comments")
                         .HasForeignKey("TaskID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Task_Management_System.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Task");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Task_Management_System.Models.Contact", b =>
+                {
+                    b.HasOne("Task_Management_System.Models.User", "User1")
+                        .WithMany("ContactsByUser")
+                        .HasForeignKey("User1ID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Task_Management_System.Models.User", "User2")
+                        .WithMany("ContactsByOthers")
+                        .HasForeignKey("User2ID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("User1");
+
+                    b.Navigation("User2");
                 });
 
             modelBuilder.Entity("Task_Management_System.Models.Image", b =>
@@ -385,11 +486,13 @@ namespace Task_Management_System.Migrations
 
             modelBuilder.Entity("Task_Management_System.Models.Project", b =>
                 {
-                    b.HasOne("Task_Management_System.Models.User", null)
+                    b.HasOne("Task_Management_System.Models.User", "User")
                         .WithMany("Projects")
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Task_Management_System.Models.Subtask", b =>
@@ -419,6 +522,25 @@ namespace Task_Management_System.Migrations
                         .IsRequired();
 
                     b.Navigation("UserRole");
+                });
+
+            modelBuilder.Entity("Task_Management_System.Models.UserProject", b =>
+                {
+                    b.HasOne("Task_Management_System.Models.Project", "Project")
+                        .WithMany("UserProjects")
+                        .HasForeignKey("ProjectID")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Task_Management_System.Models.User", "User")
+                        .WithMany("UserProjects")
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Project");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Task_Management_System.Models.UserTask", b =>
@@ -461,6 +583,8 @@ namespace Task_Management_System.Migrations
             modelBuilder.Entity("Task_Management_System.Models.Project", b =>
                 {
                     b.Navigation("TaskGroups");
+
+                    b.Navigation("UserProjects");
                 });
 
             modelBuilder.Entity("Task_Management_System.Models.Task", b =>
@@ -481,9 +605,19 @@ namespace Task_Management_System.Migrations
 
             modelBuilder.Entity("Task_Management_System.Models.User", b =>
                 {
+                    b.Navigation("BlocksByOthers");
+
+                    b.Navigation("BlocksByUser");
+
+                    b.Navigation("ContactsByOthers");
+
+                    b.Navigation("ContactsByUser");
+
                     b.Navigation("Projects");
 
                     b.Navigation("UserImage");
+
+                    b.Navigation("UserProjects");
 
                     b.Navigation("UserTasks");
                 });

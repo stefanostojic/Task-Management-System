@@ -5,15 +5,12 @@ using System.Threading.Tasks;
 
 namespace Task_Management_System.Models
 {
-    public class Comment
+    public class UserProject
     {
-        public Guid ID { get; set; }
-        public string Text { get; set; }
-        public DateTime PostedOnDate { get; set; }
+        //public Guid ID { get; set; }
         public Guid UserID { get; set; }
-        public Guid TaskID { get; set; }
-
         public User User { get; set; }
-        public Task Task { get; set; }
+        public Guid ProjectID { get; set; }
+        public Project Project { get; set; }
     }
 }

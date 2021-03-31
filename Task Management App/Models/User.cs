@@ -25,7 +25,12 @@ namespace Task_Management_System.Models
 
         public UserRole UserRole { get; set; }
         public UserImage UserImage { get; set; }
+        public ICollection<Contact> ContactsByUser { get; set; }
+        public ICollection<Contact> ContactsByOthers { get; set; }
+        public ICollection<Block> BlocksByUser { get; set; }
+        public ICollection<Block> BlocksByOthers { get; set; }
         public ICollection<Project> Projects { get; set; }
         public ICollection<UserTask> UserTasks { get; set; }
+        public ICollection<UserProject> UserProjects { get; set; }
     }
 }
