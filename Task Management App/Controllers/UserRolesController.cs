@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Task_Management_System.Data;
 using Task_Management_System.Models;
+using Task_Management_System.Validators;
 
 namespace Task_Management_System.Controllers
 {
@@ -80,13 +82,24 @@ namespace Task_Management_System.Controllers
         //[ValidateAntiForgeryToken]
         public async Task<IActionResult> AddNewUserRole([FromBody] UserRole userRole)
         {
-            if (ModelState.IsValid)
+            UserRoleValidator validator = new UserRoleValidator();
+            ValidationResult results = validator.Validate(userRole);
+
+            if (results.IsValid)
             {
                 userRole.ID = Guid.NewGuid();
                 _context.Add(userRole);
                 await _context.SaveChangesAsync();
                 return CreatedAtAction(nameof(AddNewUserRole), new { id = userRole.ID }, userRole);
                 //return Ok(userRole);
+            }
+            else
+            {
+                foreach (var failure in results.Errors)
+                {
+                    Console.WriteLine("Property " + failure.PropertyName + " failed validation. Error was: " + failure.ErrorMessage);
+                }
+                // results.ToString();
             }
             return BadRequest();
         }
