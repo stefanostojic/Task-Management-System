@@ -13,6 +13,7 @@ namespace Task_Management_System.Models
         public double Amount { get; set; }
         public bool Paid { get; set; }
         public DateTime PaymentDate { get; set; }
-        public Guid UserID { get; set; }
+
+        public virtual ProPlanUser ProPlanUser { get; set; }
     }
 }

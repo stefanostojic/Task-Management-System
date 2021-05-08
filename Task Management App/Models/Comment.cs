@@ -13,7 +13,8 @@ namespace Task_Management_System.Models
         public Guid UserID { get; set; }
         public Guid TaskID { get; set; }
 
-        public User User { get; set; }
-        public Task Task { get; set; }
+        public virtual User User { get; set; }
+        public virtual Task Task { get; set; }
+        public virtual ICollection<Image> Images { get; set; }
     }
 }
