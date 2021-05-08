@@ -31,6 +31,8 @@ namespace Task_Management_System
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
             );
 
+            services.AddCors();
+
             // In production, the React files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
@@ -52,6 +54,12 @@ namespace Task_Management_System
 
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
+
+            app.UseCors(options => options
+                .WithOrigins("http://localhost:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod());
+
 
             app.UseRouting();
 
