@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Task_Management_System.Data;
 using Task_Management_System.Models;
@@ -13,8 +11,9 @@ using Task_Management_System.Validators;
 
 namespace Task_Management_System.Controllers
 {
-    [Route("api/userRoles")]
     [ApiController]
+    [Route("api/userRoles")]
+    [Produces("application/json")]
     public class UserRolesController : Controller
     {
         private readonly TaskManagementSystemContext _context;
@@ -24,10 +23,10 @@ namespace Task_Management_System.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
-        {
-            return View(await _context.UserRoles.ToListAsync());
-        }
+        //public async Task<IActionResult> Index()
+        //{
+        //    return View(await _context.UserRoles.ToListAsync());
+        //}
 
         [HttpGet]
         public async Task<IActionResult> GetUserRoles()
@@ -51,35 +50,16 @@ namespace Task_Management_System.Controllers
                 return NotFound();
             }
 
-            //return View(userRole);
             return Ok(userRole);
         }
         
         // GET: UserRoles/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: UserRoles/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Create([Bind("ID,Name")] UserRole userRole)
+        //public IActionResult Create()
         //{
-        //    if (ModelState.IsValid)
-        //    {
-        //        userRole.ID = Guid.NewGuid();
-        //        _context.Add(userRole);
-        //        await _context.SaveChangesAsync();
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    return View(userRole);
+        //    return View();
         //}
 
         [HttpPost]
-        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> AddNewUserRole([FromBody] UserRole userRole)
         {
             UserRoleValidator validator = new UserRoleValidator();
@@ -105,26 +85,22 @@ namespace Task_Management_System.Controllers
         }
 
         // GET: UserRoles/Edit/5
-        public async Task<IActionResult> Edit(Guid? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
+        //public async Task<IActionResult> Edit(Guid? id)
+        //{
+        //    if (id == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            var userRole = await _context.UserRoles.FindAsync(id);
-            if (userRole == null)
-            {
-                return NotFound();
-            }
-            return View(userRole);
-        }
+        //    var userRole = await _context.UserRoles.FindAsync(id);
+        //    if (userRole == null)
+        //    {
+        //        return NotFound();
+        //    }
+        //    return View(userRole);
+        //}
 
-        // POST: UserRoles/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPut("{id}")]
-        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(Guid id, UserRole userRole)
         {
             if (id != userRole.ID)
@@ -154,24 +130,6 @@ namespace Task_Management_System.Controllers
             }
             return NoContent();
         }
-
-        // GET: UserRoles/Delete/5
-        //public async Task<IActionResult> Delete(Guid? id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    var userRole = await _context.UserRoles
-        //        .FirstOrDefaultAsync(m => m.ID == id);
-        //    if (userRole == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return View(userRole);
-        //}
 
         // POST: UserRoles/Delete/5
         [HttpDelete("{id}")]
