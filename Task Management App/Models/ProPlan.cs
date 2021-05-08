@@ -11,5 +11,7 @@ namespace Task_Management_System.Models
         public string Name { get; set; }
         public double Price { get; set; }
         public bool Active { get; set; }
+
+        public virtual ICollection<ProPlanUser> ProPlanUsers { get; set; }
     }
 }
