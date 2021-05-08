@@ -1,14 +1,81 @@
+:root {
+  --items-root-color: black;
+}
+
 /* Provide sufficient contrast against white background */
 a {
   color: #0366d6;
 }
 
 code {
-  color: #E01A76;
+  color: #e01a76;
 }
+
+/* button {
+  background-color: cornflowerblue;
+  color: white;
+  border-radius: 5px;
+} */
 
 .btn-primary {
   color: #fff;
   background-color: #1b6ec2;
   border-color: #1861ac;
+}
+
+.app {
+  display: flex;
+}
+
+.manager {
+  border: 1px solid rgb(80, 80, 80);
+  box-shadow: 1px 1px 1px rgb(228 228 228);
+  width: 500px;
+  margin: 10px;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.user-role {
+  background-color: rgb(249, 62, 255);
+  width: 300px;
+  box-shadow: 1px 1px 1px rgb(228, 228, 228);
+  display: inline-flex;
+  margin: 10px;
+  padding: 10x;
+  flex-direction: column;
+}
+
+.city {
+  background-color: rgb(255, 238, 0);
+  width: 300px;
+  box-shadow: 1px 1px 1px rgb(228, 228, 228);
+  display: inline-flex;
+  margin: 10px;
+  padding: 10px;
+  flex-direction: column;
+}
+
+.item {
+  border-radius: 5px;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  color: var(--items-root-color);
+}
+
+.item .text {
+  /* flex: 9; */
+}
+
+.item .button {
+  /* flex: 1; */
+  cursor: pointer;
+}
+
+.item:hover {
+  box-shadow: 0px 0px 15px 5px #007bff3b;
 }
