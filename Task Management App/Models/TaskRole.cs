@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Task_Management_System.Models
 {
-    public class TaskRole
+    public class TaskRole : BaseEntity
     {
-        public Guid ID { get; set; }
         public string Name { get; set; }
 
-        public ICollection<UserTask> UserTasks { get; set; }
+        public virtual ICollection<UserTask> UserTasks { get; set; }
     }
 }

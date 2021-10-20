@@ -1,129 +1,95 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Task_Management_System.Data;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
+using Task_Management_System.Auth;
+using Task_Management_System.DTO;
 using Task_Management_System.Models;
+using Task_Management_System.Models.Dtos;
+using Task_Management_System.Services;
+using Task_Management_System.Services.UserService;
 
 namespace Task_Management_System.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/users")]
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly TaskManagementSystemContext _context;
+        private readonly IUserService userService;
+        private readonly IMapper mapper;
+        private readonly IAuthorizationService authorizationService;
 
-        public UsersController(TaskManagementSystemContext context)
+        public UsersController(IUserService service, IMapper mapper, IAuthorizationService authorizationService)
         {
-            _context = context;
+            this.userService = service;
+            this.mapper = mapper;
+            this.authorizationService = authorizationService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetUsers()
+        public async Task<ActionResult<PagedResponse<UserResponseDto>>> GetUsers([FromQuery] PaginationFilter paginationFilter)
         {
-            var users = await _context.Users
-                .ToListAsync();
+            var users = await userService.GetAllAsync(paginationFilter);
 
-            return Ok(users);
+            var pagedResponse = new PagedResponse<UserResponseDto>()
+            {
+                CurrentPage = users.CurrentPage,
+                PageSize = users.PageSize,
+                TotalItems = users.TotalItems,
+                TotalPages = users.TotalPages,
+                Items = mapper.Map<IEnumerable<UserResponseDto>>(users.Items)
+            };
+
+            return Ok(pagedResponse);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserById(Guid? id, [FromQuery] bool loadProjects = false)
+        public async Task<IActionResult> GetUserById(Guid id)
         {
-            if (id == null)
+            var User = await userService.GetByIdAsync(id);
+
+            if (User == null)
             {
                 return NotFound();
             }
 
-            //var user = await _context.Users
-            //    .Include(s => s.UserTasks)
-            //        .ThenInclude(e => e.Task)
-            //    .AsNoTracking()
-            //    .FirstOrDefaultAsync(m => m.ID == id);
-
-            var user = await _context.Users
-                .FindAsync(id);
-
-            if (loadProjects)
-            {
-                await _context.Entry(user)
-                    .Collection(u => u.Projects)
-                    .LoadAsync();
-            }
-
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            //return View(userRole);
-            return Ok(user);
+            return Ok(mapper.Map<UserResponseDto>(User));
         }
 
-        // PUT: api/Users/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(Guid id, User user)
+        public async Task<IActionResult> Edit([FromQuery] Guid id, [FromBody] UserPutDto userPutDto)
         {
-            if (id != user.ID)
+            if (id != userPutDto.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(user).State = EntityState.Modified;
+            var authorizationResult = await authorizationService
+                .AuthorizeAsync(User, "EditPolicy");
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await userService.UpdateAsync(userPutDto);
 
             return NoContent();
         }
 
-        // POST: api/Users
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
-        {
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetUser", new { id = user.ID }, user);
-        }
-
-        // DELETE: api/Users/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
-            var user = await _context.Users.FindAsync(id);
-            if (user == null)
+            var success = await userService.RemoveByIdAsync(id);
+
+            if (!success)
             {
                 return NotFound();
             }
 
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-
             return NoContent();
-        }
-
-        private bool UserExists(Guid id)
-        {
-            return _context.Users.Any(e => e.ID == id);
         }
     }
 }

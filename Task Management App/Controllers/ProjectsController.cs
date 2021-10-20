@@ -1,108 +1,109 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Task_Management_System.Data;
-using Task_Management_System.Models;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Task_Management_System.DTO;
+using Task_Management_System.Models.Dtos;
+using Task_Management_System.Services.ProjectService;
 
 namespace Task_Management_System.Controllers
 {
-    [Route("api/[controller]")]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    //[Authorize]
     [ApiController]
+    [Route("api/projects")]
+    [Produces("application/json")]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public class ProjectsController : ControllerBase
     {
-        private readonly TaskManagementSystemContext _context;
+        private readonly IProjectService projectService;
+        private readonly IMapper mapper;
 
-        public ProjectsController(TaskManagementSystemContext context)
+        public ProjectsController(IProjectService projectService, IMapper mapper)
         {
-            _context = context;
+            this.projectService = projectService;
+            this.mapper = mapper;
         }
 
-        // GET: api/Projects
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Project>>> GetProjects()
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult<PagedResponse<ProjectResponseDto>>> GetProjects([FromQuery] PaginationFilter paginationFilter)
         {
-            return await _context.Projects.ToListAsync();
+            var projects = await projectService.GetAllAsync(paginationFilter);
+
+            var pagedResponse = new PagedResponse<ProjectResponseDto>()
+            {
+                CurrentPage = projects.CurrentPage,
+                PageSize = projects.PageSize,
+                TotalItems = projects.TotalItems,
+                TotalPages = projects.TotalPages,
+                Items = mapper.Map<IEnumerable<ProjectResponseDto>>(projects.Items)
+            };
+
+            return Ok(pagedResponse);
         }
 
-        // GET: api/Projects/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Project>> GetProject(Guid id)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetProjectById(Guid id)
         {
-            var project = await _context.Projects.FindAsync(id);
+            var project = await projectService.GetByIdAsync(id);
 
             if (project == null)
             {
                 return NotFound();
             }
 
-            return project;
+            return Ok(mapper.Map<ProjectResponseDto>(project));
         }
 
-        // PUT: api/Projects/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutProject(Guid id, Project project)
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public async Task<IActionResult> AddNewProject([FromBody] ProjectPostDto projectPostDto)
         {
-            if (id != project.ID)
+            var projectResp = await projectService.AddAsync(projectPostDto);
+
+            return CreatedAtAction("AddNewProject", new { id = projectResp.ID }, mapper.Map<ProjectResponseDto>(projectResp));
+        }
+
+        [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Edit([FromQuery] Guid id, [FromBody] ProjectPutDto projectPutDto)
+        {
+            if (id != projectPutDto.ID)
             {
                 return BadRequest();
             }
 
-            _context.Entry(project).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ProjectExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await projectService.UpdateAsync(projectPutDto);
 
             return NoContent();
         }
 
-        // POST: api/Projects
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Project>> PostProject(Project project)
-        {
-            _context.Projects.Add(project);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetProject", new { id = project.ID }, project);
-        }
-
-        // DELETE: api/Projects/5
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> DeleteProject(Guid id)
         {
-            var project = await _context.Projects.FindAsync(id);
-            if (project == null)
+            var success = await projectService.RemoveByIdAsync(id);
+
+            if (!success)
             {
                 return NotFound();
             }
 
-            _context.Projects.Remove(project);
-            await _context.SaveChangesAsync();
-
             return NoContent();
-        }
-
-        private bool ProjectExists(Guid id)
-        {
-            return _context.Projects.Any(e => e.ID == id);
         }
     }
 }

@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace Task_Management_System.Models
 {
-    public class ProPlan
+    public class ProPlan : BaseEntity
     {
-        public Guid ID { get; set; }
+        //public Guid ID { get; set; }
         public string Name { get; set; }
         public double Price { get; set; }
         public bool Active { get; set; }

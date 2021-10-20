@@ -6,16 +6,15 @@ using System.Threading.Tasks;
 
 namespace Task_Management_System.Models
 {
-    public class Project
+    public class Project : BaseEntity
     {
-        public Guid ID { get; set; }
+        //public Guid ID { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        //[JsonIgnore]
-        public Guid UserID { get; set; }
 
-        //[JsonIgnore]
+        public Guid UserID { get; set; }
         public virtual User User { get; set; }
+
         public virtual ICollection<TaskGroup> TaskGroups { get; set; }
         public virtual ICollection<UserProject> UserProjects { get; set; }
     }

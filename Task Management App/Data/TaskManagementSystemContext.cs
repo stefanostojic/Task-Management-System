@@ -1,13 +1,20 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
 using Task_Management_System.EntityConfigurations;
 using Task_Management_System.Models;
 
 namespace Task_Management_System.Data
 {
-    public class TaskManagementSystemContext : DbContext
+    public class TaskManagementSystemContext : IdentityDbContext<User, UserRole, Guid>
     {
-        public TaskManagementSystemContext(DbContextOptions<TaskManagementSystemContext> options) : base(options)
+        private readonly ILoggerFactory loggerFactory;
+
+        public TaskManagementSystemContext(DbContextOptions<TaskManagementSystemContext> options, ILoggerFactory loggerFactory) 
+            : base(options)
         {
+            this.loggerFactory = loggerFactory;
         }
 
         public DbSet<Block> Blocks { get; set; }
@@ -25,13 +32,15 @@ namespace Task_Management_System.Data
         public DbSet<TaskGroup> TaskGroups { get; set; }
         public DbSet<TaskLabel> TaskLabes { get; set; }
         public DbSet<TaskRole> TaskRoles { get; set; }
-        public DbSet<User> Users { get; set; }
+        public DbSet<User> AppUsers { get; set; }
         public DbSet<UserProject> UserProjects { get; set; }
-        public DbSet<UserRole> UserRoles { get; set; }
+        public DbSet<UserRole> AppUserRoles { get; set; }
         public DbSet<UserTask> UserTasks { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.ApplyConfiguration(new BlockEntityConfiguration());
             modelBuilder.ApplyConfiguration(new CommentEntityConfiguration());
             modelBuilder.ApplyConfiguration(new ContactEntityConfiguration());
@@ -51,6 +60,11 @@ namespace Task_Management_System.Data
             modelBuilder.ApplyConfiguration(new UserProjectEntityConfiguration());
             modelBuilder.ApplyConfiguration(new UserRoleEntityConfiguration());
             modelBuilder.ApplyConfiguration(new UserTaskEntityConfiguration());
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseLoggerFactory(this.loggerFactory);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using Task_Management_System.Models;
@@ -7,7 +8,7 @@ namespace Task_Management_System.Data
 {
     public static class DbInitializer
     {
-        public static void Initialize(TaskManagementSystemContext context)
+        public static void Initialize(TaskManagementSystemContext context, UserManager<User> um, RoleManager<UserRole> rm)
         {
             context.Database.EnsureCreated();
 
@@ -24,21 +25,22 @@ namespace Task_Management_System.Data
             var userRoles = new UserRole[]
             {
                 new UserRole {
-                    ID = Guid.Parse("c8ae737c-ed9b-4fee-be6f-9c74ba376ae7"),
+                    Id = Guid.Parse("c8ae737c-ed9b-4fee-be6f-9c74ba376ae7"),
                     Name = "Administrator"
                 },
                 new UserRole {
-                    ID = Guid.Parse("56860de3-f338-449c-be26-c946d4cb73b0"),
+                    Id = Guid.Parse("56860de3-f338-449c-be26-c946d4cb73b0"),
                     Name = "NormalUser"
                 },
                 new UserRole {
-                    ID = Guid.Parse("5a1808ce-43b3-4e8b-9789-271b33b04f43"),
+                    Id = Guid.Parse("5a1808ce-43b3-4e8b-9789-271b33b04f43"),
                     Name = "ProUser"
                 }
             };
             foreach (UserRole ur in userRoles)
             {
-                context.UserRoles.Add(ur);
+                //context.AppUserRoles.Add(ur);
+                rm.CreateAsync(ur).Wait();
             }
             context.SaveChanges();
             #endregion
@@ -63,41 +65,46 @@ namespace Task_Management_System.Data
             #endregion
             
             #region Users
+            var hasher = new PasswordHasher<User>();
             var users = new User[]
             {
                 new User {
-                    ID = Guid.Parse("c68af42e-fd7c-4ebb-a8d1-f714a47f60a7"),
+                    Id = Guid.Parse("c68af42e-fd7c-4ebb-a8d1-f714a47f60a7"),
                     FirstName = "Stefan",
                     LastName = "Ostojić",
+                    UserName = "s.ostojic@gmail.com",
                     Email = "s.ostojic@email.com",
                     Password = "123",
-                    UserRoleID = Guid.Parse("56860de3-f338-449c-be26-c946d4cb73b0"),
-                    ImageID = Guid.Parse("065e4bc3-b0ec-4a5f-9b0d-a9814daa977f")
+                    UserRoleID = Guid.Parse("56860de3-f338-449c-be26-c946d4cb73b0")
+                    //,ImageID = Guid.Parse("065e4bc3-b0ec-4a5f-9b0d-a9814daa977f")
                 }, // NormalUser
                 new User {
-                    ID = Guid.Parse("fe556bd9-f1bb-4f6a-b2b1-245f8daf9c08"),
+                    Id = Guid.Parse("fe556bd9-f1bb-4f6a-b2b1-245f8daf9c08"),
                     FirstName = "Dušan",
                     LastName = "Krstić",
+                    UserName = "d.krstic@email.com",
                     Email = "d.krstic@email.com",
                     Password = "123",
-                    UserRoleID = Guid.Parse("56860de3-f338-449c-be26-c946d4cb73b0"),
-                    ImageID = Guid.Parse("9374a199-a242-44d1-8593-4375985b0b17")
+                    UserRoleID = Guid.Parse("56860de3-f338-449c-be26-c946d4cb73b0")
+                    //,ImageID = Guid.Parse("9374a199-a242-44d1-8593-4375985b0b17")
                 }, // NormalUser
                 new User {
-                    ID = Guid.Parse("008127f1-efcd-4a74-8b26-cef9d4854c0c"),
+                    Id = Guid.Parse("008127f1-efcd-4a74-8b26-cef9d4854c0c"),
                     FirstName = "Dejan",
                     LastName = "Tosenberger",
+                    UserName = "d.tosenberger@email.com",
                     Email = "d.tosenberger@email.com",
                     Password = "123",
-                    UserRoleID = Guid.Parse("c8ae737c-ed9b-4fee-be6f-9c74ba376ae7"),
-                    ImageID = null
+                    UserRoleID = Guid.Parse("c8ae737c-ed9b-4fee-be6f-9c74ba376ae7")
+                    //,ImageID = null
                 } // Administrator
             };
+
             foreach (User u in users)
             {
-                context.Users.Add(u);
+                //context.Users.Add(u);
+                um.CreateAsync(u, u.Password).Wait();
             }
-            context.SaveChanges();
             #endregion
             
             #region Projects
@@ -191,6 +198,48 @@ namespace Task_Management_System.Data
             context.SaveChanges();
             #endregion
 
+            #region Labels
+            var labels = new Label[]
+            {
+                new Label {
+                    ID = Guid.Parse("9be61ae2-9898-4ebb-80ad-53cff3355b84"),
+                    Name = "Dizajn"
+                },
+                new Label {
+                    ID = Guid.Parse("eca84b44-94a5-4d4d-8eea-ed773095d80b"),
+                    Name = "Programiranje"
+                }
+            };
+            foreach (Label l in labels)
+            {
+                context.Labels.Add(l);
+            }
+            context.SaveChanges();
+            #endregion
+
+            #region Subtasks
+            var subtasks = new Subtask[]
+            {
+                new Subtask {
+                    ID = Guid.Parse("707a5752-c849-4f78-8c66-875c23a9bf6d"),
+                    Name = "Dizajn početne strane",
+                    Finished = true,
+                    TaskID = Guid.Parse("304ea812-5153-4992-a8bc-da8c22ab1fad")
+                },
+                new Subtask {
+                    ID = Guid.Parse("3a0f44e5-bddd-4d68-adfe-28ab9a889b18"),
+                    Name = "Dizajn logoa",
+                    Finished = true,
+                    TaskID = Guid.Parse("304ea812-5153-4992-a8bc-da8c22ab1fad")
+                }
+            };
+            foreach (Subtask st in subtasks)
+            {
+                context.Subtasks.Add(st);
+            }
+            context.SaveChanges();
+            #endregion
+
             #region TaskRoles
             var taskRoles = new TaskRole[]
             {
@@ -236,7 +285,35 @@ namespace Task_Management_System.Data
             }
             context.SaveChanges();
             #endregion
-            
+
+            #region ProPlans
+            var proPlans = new ProPlan[]
+            {
+                new ProPlan {
+                    ID = Guid.Parse("23f2209e-2921-4e01-8f66-63790acaca6f"),
+                    Name = "Pro Silver",
+                    Active = true,
+                    Price = 10
+                },
+                new ProPlan {
+                    ID = Guid.Parse("408e2add-b6ff-4762-bdc1-31caf2584dfd"),
+                    Name = "Pro Gold",
+                    Active = true,
+                    Price = 15
+                },
+                new ProPlan {
+                    ID = Guid.Parse("3a11f288-17d6-431b-98bb-c47a906d84f0"),
+                    Name = "Pro Platinum",
+                    Active = true,
+                    Price = 20
+                }
+            };
+            foreach (ProPlan pp in proPlans)
+            {
+                context.ProPlans.Add(pp);
+            }
+            context.SaveChanges();
+            #endregion
         }
     }
 }
